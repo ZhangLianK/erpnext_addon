@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Summary Report</title>
+    <style>
+        body {
+            margin: 1rem;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        .yellow-background {
+            background-color: #FFFF00;
+        }
+        .green-background {
+            background-color: #90EE90;
+            font-weight: bold;
+        }
+        .grey-background {
+            background-color: #D3D3D3;
+        }
+        @media print {
+            @page {
+                size: A4;
+                margin: 1rem;
+                size: landscape;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            h1 {
+                text-align: center;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            th, td {
+                padding: 5px;
+                text-align: left;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important; /* Force color printing */
+            }
+            th {
+                background-color: #f8f8f8 !important;
+            }
+            .yellow-background {
+                background-color: #FFFF00 !important;
+            }
+            .green-background {
+                background-color: #90EE90 !important;
+                font-weight: bold;
+            }
+            .grey-background {
+                background-color: #D3D3D3 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>订单摘要</h1>
+    <h2>单号：{{ sales_order.sales_order }}</h2>
+    <table>
+        <tr>
+            <th class="yellow-background">订单备注</th>
+            <th class="yellow-background">计划量</th>
+            <th class="yellow-background">单价</th>
+            <th class="yellow-background">计划总金额</th>
+            <th class="yellow-background">已收金额</th>
+            <th class="yellow-background">提油总量</th>
+            <th class="yellow-background">应付金额</th>
+            <th class="yellow-background">应补-/应退+</th>
+        </tr>
+        <tr>
+            <td>{{ sales_order.order_note }}</td>
+            <td>{{ sales_order.qty }}</td>
+            <td>{{ sales_order.rate }}</td>
+            <td>{{ sales_order.amount }}</td>
+            <td>{{ sales_order.total_payments }}</td>
+            <td>{{ sales_order.delivered_qty }}</td>
+            <td>{{ sales_order.delivered_qty_amount }}</td>
+            <td style="color: {{ '#FF0000' if (sales_order.total_payments  - sales_order.delivered_qty_amount) < 0 else 'black' }};">{{ sales_order.total_payments  - sales_order.delivered_qty_amount }}</td>
+        </tr>
+        <!-- Additional rows for payment entries -->
+        <tr class="grey-background"><td colspan="8"></td></tr>
+        <tr class="green-background">
+            <td colspan="5">实际打款明细</td>
+        </tr>
+        <tr>
+            <th>No.</th>
+            <th>收款日期</th>
+            <th>备注</th>
+            <th>收款金额</th>
+            <th>清账状态</th>
+        </tr>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ payment.posting_date }}</td>
+            <td>{{ payment.mode_of_payment }}</td>
+            <td>{{ payment.paid_amount }}</td>
+            <td>{{ payment.clear_status }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="grey-background"><td colspan="8"></td></tr>
+        <!-- Additional rows for items -->
+        <tr class="green-background">
+            <td colspan="7">实际提货明细</td>
+        </tr>
+        <tr>
+            <th>No.</th>
+            <th>出油日期</th>
+            <th>品名</th>
+            <th>车号</th>
+            <th>结算类型</th>
+            <th>装车吨数</th>
+            <th>卸车吨数</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.stock_date }}</td>
+            <td>{{ item.item }}</td>
+            <td>{{ item.vehicle }}</td>
+            <td>{{ item.bill_type }}</td>
+            <td>{{ item.load_net_weight }}</td>
+            <td>{{ item.offload_net_weight }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td>总计：</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>{{ items|sum('load_net_weight') }}</td>
+            <td>{{ items|sum('offload_net_weight') }}</td>
+        </tr>
+    </table>
+</body>
+</html>
