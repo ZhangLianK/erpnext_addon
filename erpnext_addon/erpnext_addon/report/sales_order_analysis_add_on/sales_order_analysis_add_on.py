@@ -373,7 +373,7 @@ def get_columns(filters):
    
    
 			{
-				"label": _(""),
+				"label": _("Variance Amount"),
 				"fieldname": "variance_amount",
 				"fieldtype": "Currency",
 				"width": 100,
